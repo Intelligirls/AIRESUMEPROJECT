@@ -6,20 +6,18 @@
 body {
   margin: 0;
   padding: 0;
-  background-image: url('https://images.unsplash.com/photo-1602407294553-6ac9170b3ed0?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVzdW1lfGVufDB8fDB8fHww');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  background: #176787;
   color: #1a1a1a;
 }
 
 .container {
-  max-width: 700px;
-  margin: 60px auto;
-  padding: 30px 40px;
-  background-color: rgba(255, 255, 255, 0.95);
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 40px 50px;
+  background-color: white;
   border-radius: 12px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  word-wrap: break-word;
 }
 
 h1 {
@@ -53,17 +51,28 @@ h1 {
   outline: none;
 }
 
+.resume-text {
+  white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 16px;
+  background-color: #f4f4f4;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+  overflow-wrap: break-word;
+}
+
 .btn {
-  display: block;
-  width: 100%;
+  display: inline-block;
   margin-top: 30px;
-  padding: 15px;
+  padding: 15px 25px;
   background-color: #00012a;
   color: white;
   font-size: 18px;
   font-weight: bold;
   border: none;
   border-radius: 8px;
+  text-decoration: none;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -83,3 +92,4 @@ h1 {
     font-size: 26px;
   }
 }
+

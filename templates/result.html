@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Generated Resume</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <div class="container">
     <h1>Resume Summary for {{ name }}</h1>
-
     <div class="info-block">
       <p><strong>Job Title:</strong> {{ job }}</p>
       <p><strong>Email:</strong> {{ email }}</p>
@@ -23,12 +22,14 @@
       <p>{{ education }}</p>
     </div>
 
-    <h2>AI Generated Summary</h2>
-    <pre class="resume-text">{{ resume }}</pre>
+    <h2>AI Generated Resume</h2>
+    <div class="resume-text">{{ resume.replace('\n', '<br>') | safe }}</div>
+    
+<div class="buttons" {% if hide_buttons %}style="display:none;"{% endif %}>
+  <a href="/download-word" class="btn">Download as Word</a>
+  <a href="/" class="btn">Back</a>
+</div>
 
-    <div class="buttons">
-      <a href="/download" class="btn btn-download">Download as PDF</a>
-      <a href="/" class="btn btn-back">Back</a>
     </div>
   </div>
 </body>

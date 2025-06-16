@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>AI Resume Builder</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -10,22 +10,22 @@
     <h1>AI Resume Builder</h1>
     <form class="resume-form" action="/generate" method="post">
       <label for="name">Full Name:</label>
-      <input type="text" name="name" id="name" required />
+      <input type="text" name="name" id="name" required>
 
       <label for="job">Job Title:</label>
-      <input type="text" name="job" id="job" required />
+      <input type="text" name="job" id="job" required>
 
       <label for="email">Email:</label>
-      <input type="email" name="email" id="email" required />
+      <input type="email" name="email" id="email" required>
 
       <label for="phone">Phone Number:</label>
-      <input type="text" name="phone" id="phone" required />
+      <input type="text" name="phone" id="phone" required>
 
       <label for="summary">Summary / Objective:</label>
       <textarea name="summary" id="summary" rows="4" required></textarea>
 
       <label for="skills">Skills (comma separated):</label>
-      <input type="text" name="skills" id="skills" required />
+      <input type="text" name="skills" id="skills" required>
 
       <label for="experience">Work Experience:</label>
       <textarea name="experience" id="experience" rows="5" required></textarea>
