@@ -6,7 +6,9 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 import cohere
 
 app = Flask(__name__)
-co = cohere.Client("NqCDyPmfZHiXEDiyn0Xooutz67b0XHFPoeZ8qeYy")  # Replace with your actual key
+
+# Set your Cohere API key
+co = cohere.Client("NqCDyPmfZHiXEDiyn0Xooutz67b0XHFPoeZ8qeYy")  # Replace with your real key
 
 generated_data = {}
 
@@ -28,70 +30,94 @@ def generate():
         f"Work Experience: {data.get('experience')}\n"
         f"Education: {data.get('education')}\n"
         f"Certifications: {data.get('certifications', '')}\n"
-        "Include the following sections: Summary, Skills, Work Experience, Education, Certifications.\n"
-        "Do not include references or generic advice messages. Format with professional headings."
+        "Format with clear headings and bullet points. Do NOT include references."
     )
 
-    response = co.generate(model="command", prompt=prompt, max_tokens=1500, temperature=0.7)
+    response = co.generate(
+        model="command",
+        prompt=prompt,
+        max_tokens=1500,
+        temperature=0.7,
+    )
+
     resume_text = response.generations[0].text.strip()
 
-    # Remove unwanted phrases
-    cleanup_phrases = [
-        "Here is a sample resume",
-        "REFERENCES\nAvailable upon request.",
-        "Do you need more information added?",
-        "Let me know what you would like to add or adjust.",
-        "feel free to provide any additional information you would like to incorporate into your resume."
-    ]
-    for phrase in cleanup_phrases:
-        resume_text = resume_text.replace(phrase, "")
-    resume_text = resume_text.strip()
+    generated_data = {
+        "name": data.get("name", "Your Name"),
+        "job": data.get("job", ""),
+        "email": data.get("email", ""),
+        "phone": data.get("phone", ""),
+        "resume_text": resume_text,
+    }
 
-    generated_data = {"resume": resume_text, **data}
-    return render_template("result.html", resume=resume_text, hide_buttons=False, **data)
+    return render_template("result.html", resume=resume_text, **generated_data)
 
 @app.route("/download-word")
 def download_word():
     global generated_data
     doc = Document()
 
-    def add_heading(text, level=1, center=False):
-        h = doc.add_heading(text, level)
-        if center:
-            h.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    # Title
+    title = doc.add_heading(generated_data.get("name", "Your Name"), level=0)
+    title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
-    def add_paragraph(text, bold=False):
-        if text.upper() == "N/A":
-            return  # Don't add N/A text
-        para = doc.add_paragraph()
-        run = para.add_run(text)
-        run.bold = bold
-        run.font.size = Pt(11)
+    # Job title
+    job_title = doc.add_paragraph(generated_data.get("job", ""))
+    job_title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    job_title.runs[0].font.size = Pt(14)
+    job_title.runs[0].bold = True
 
-    # Header
-    add_heading(generated_data.get("name", "Your Name"), level=0, center=True)
-    add_paragraph(f"Job Title: {generated_data.get('job', '')}", bold=True)
+    # Contact
+    contact = doc.add_paragraph()
+    contact.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    run = contact.add_run(f"Email: {generated_data.get('email', '')} | Phone: {generated_data.get('phone', '')}")
+    run.font.size = Pt(10)
+    run.italic = True
+
     doc.add_paragraph()
-    add_paragraph(f"Email: {generated_data.get('email', '')}")
-    add_paragraph(f"Phone: {generated_data.get('phone', '')}")
     doc.add_paragraph()
 
-    # Resume Content
-    for line in generated_data.get("resume", "").split("\n"):
-        line = line.strip()
-        if not line:
-            continue
+    def add_heading(text):
+        heading = doc.add_heading(text.upper(), level=1)
+        heading.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
 
-        is_heading = line.endswith(":") or (line.isupper() and len(line.split()) <= 3)
-        if is_heading:
-            add_heading(line, level=2)
-        elif line.upper() != "N/A":
-            add_paragraph(line)
+    def add_bullets(text):
+        lines = [line.strip("•- \t") for line in text.split("\n") if line.strip()]
+        for line in lines:
+            doc.add_paragraph(line, style="List Bullet")
 
-    # Word download
+    known_sections = [
+        "SUMMARY", "SKILLS", "WORK EXPERIENCE", "ENGINEERING PROJECTS",
+        "RELEVANT SKILLS", "ABILITIES", "EDUCATION", "CERTIFICATIONS", "CONTACT INFORMATION"
+    ]
+
+    text = generated_data.get("resume_text", "")
+    sections = {}
+    current_section = None
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        heading_candidate = stripped.rstrip(":").upper()
+        if heading_candidate in known_sections:
+            current_section = heading_candidate
+            sections[current_section] = ""
+        elif current_section:
+            sections[current_section] += line + "\n"
+
+    for section in known_sections:
+        content = sections.get(section, "").strip()
+        if content:
+            add_heading(section)
+            if section in ["SUMMARY", "EDUCATION", "CONTACT INFORMATION"]:
+                doc.add_paragraph(content)
+            else:
+                add_bullets(content)
+            doc.add_paragraph()
+
     buffer = BytesIO()
     doc.save(buffer)
     buffer.seek(0)
+
     response = make_response(buffer.read())
     response.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     response.headers["Content-Disposition"] = "attachment; filename=resume.docx"
@@ -99,4 +125,3 @@ def download_word():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
